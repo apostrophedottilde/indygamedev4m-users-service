@@ -1,5 +1,5 @@
 import * as cdk from '@aws-cdk/core';
-import { LambdaIntegration, Resource, RestApi } from '@aws-cdk/aws-apigateway';
+import { Authorizer, LambdaIntegration, Resource, RestApi, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
 import { Code, Function, Runtime, StartingPosition } from '@aws-cdk/aws-lambda';
 import { AttributeType, Table, StreamViewType } from '@aws-cdk/aws-dynamodb';
 import { Queue } from '@aws-cdk/aws-sqs';
@@ -75,11 +75,26 @@ export class UsersServiceStack extends cdk.Stack {
       }
     });
 
+    const authHandler = new Function(this, 'set_user_profile_image_handler', {
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset('resources/lambda/profileImages'),
+      handler: "auth.handler",
+      environment: {
+        TABLE_NAME: dbTable.tableName
+      }
+    });
+
     dbTable.grantReadData(getUserhandler);
     dbTable.grantWriteData(createUserHandler);
     dbTable.grantReadWriteData(deregisterUserHandler);
 
     const api: RestApi = new RestApi(this, "foremz-user-api");
+    const author = new TokenAuthorizer(this, 'api-authorizeor', {
+      handler: authHandler
+    });
+
+    author._attachToApi(api);
+
 
     const usersResource: Resource = api.root.addResource('users');
     usersResource.addMethod('POST', new LambdaIntegration(createUserHandler));
