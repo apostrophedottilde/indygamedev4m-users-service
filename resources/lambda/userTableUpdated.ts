@@ -9,6 +9,8 @@ export async function handler(event: DynamoDBStreamEvent): Promise<any> {
         const response = event.Records
             .filter((e: any) => e.eventName === 'REMOVE')
             .forEach(async (e) => {
+                console.log(e)
+                console.log("a removal")
                 return await sns.publish({
                     Message: `User has been deleted`,
                     TopicArn: process.env.userDeregisteredTopicArn!
