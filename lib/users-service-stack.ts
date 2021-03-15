@@ -75,7 +75,7 @@ export class UsersServiceStack extends cdk.Stack {
       }
     });
 
-    const authHandler = new Function(this, 'set_user_profile_image_handler', {
+    const authHandler = new Function(this, 'auth_handler', {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset('resources/lambda/profileImages'),
       handler: "auth.handler",
