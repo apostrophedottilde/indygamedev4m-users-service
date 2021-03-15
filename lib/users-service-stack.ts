@@ -77,7 +77,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const authHandler = new Function(this, 'auth_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda/profileImages'),
+      code: Code.fromAsset('resources/lambda'),
       handler: "auth.handler",
       environment: {
         TABLE_NAME: dbTable.tableName
@@ -89,6 +89,7 @@ export class UsersServiceStack extends cdk.Stack {
     dbTable.grantReadWriteData(deregisterUserHandler);
 
     const api: RestApi = new RestApi(this, "foremz-user-api");
+
     const author = new TokenAuthorizer(this, 'api-authorizeor', {
       handler: authHandler
     });
