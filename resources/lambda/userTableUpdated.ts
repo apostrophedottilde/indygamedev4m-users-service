@@ -6,15 +6,16 @@ const sns = new SNS({ apiVersion: '2010-03-31' })
 
 export async function handler(event: DynamoDBStreamEvent): Promise<null> {
     try {
-        // event.Records.forEach(async (e: DynamoDBRecord) => {
-        //     if(e.eventName == 'REMOVE') {
+        // event.Records.forEach(async (e) => {
+        //     if (e.eventName == 'REMOVE') {
+                console.log(event)
                 const response = await sns.publish({
                     Message: `User has been deleted`,
                     TopicArn: process.env.userDeregisteredTopicArn!
                 }).promise();
                 console.log(response);
                 console.log("did at least try inniut")
-            // }
+        //     }
         // });
         return null;
     } catch (err) {
