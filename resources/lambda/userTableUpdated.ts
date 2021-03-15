@@ -10,12 +10,12 @@ export async function handler(event: DynamoDBStreamEvent): Promise<null> {
             console.log(e.eventName!);
             if (e.eventName! == "REMOVE") {
                 console.log(event)
-                const response = await sns.publish({
+                return await sns.publish({
                     Message: `User has been deleted`,
                     TopicArn: process.env.userDeregisteredTopicArn!
                 }).promise();
-                console.log(response);
             }
+            return null;
         });
         return null;
     } catch (err) {
