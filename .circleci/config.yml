@@ -19,7 +19,7 @@ jobs:
       - run: npm run build
       - run: ls && aws s3 sync ./build s3://website-deployment-bucket/
 workflows:
-  deploy_website:
+  deploy_users_service:
     jobs:
       - cdk
       

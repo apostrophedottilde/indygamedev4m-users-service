@@ -1,5 +1,5 @@
 import * as cdk from '@aws-cdk/core';
-import { Authorizer, LambdaIntegration, Resource, RestApi, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
+import { Authorizer, IdentitySource, LambdaIntegration, RequestAuthorizer, Resource, RestApi, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
 import { Code, Function, Runtime, StartingPosition } from '@aws-cdk/aws-lambda';
 import { AttributeType, Table, StreamViewType } from '@aws-cdk/aws-dynamodb';
 import { Queue } from '@aws-cdk/aws-sqs';
@@ -90,8 +90,9 @@ export class UsersServiceStack extends cdk.Stack {
 
     const api: RestApi = new RestApi(this, "foremz-user-api");
 
-    const author = new TokenAuthorizer(this, 'api-authorizeor', {
-      handler: authHandler
+    const author = new RequestAuthorizer(this, 'api-authorizeor', {
+      handler: authHandler,
+      identitySources: [IdentitySource.header('Authorizer')]
     });
 
     author._attachToApi(api);
