@@ -30,6 +30,7 @@
     "@aws-cdk/aws-s3": "^1.92.0",
     "@aws-cdk/core": "1.92.0",
     "aws-sdk": "^2.862.0",
+    "jsonwebtoken": "^8.5.1",
     "source-map-support": "^0.5.16"
   }
 }
