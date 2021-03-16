@@ -5,6 +5,8 @@ const dynamo = new DynamoDB();
 
 export async function handler(event: APIGatewayEvent): Promise<any> {
     try {
+        console.log(event);
+        console.log(event.requestContext.authorizer);
         const data = JSON.parse(event.body!);
         const id: string = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 

@@ -46,7 +46,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const getUserhandler = new Function(this, 'get_user_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset("resources/lambda/users"),
+      code: Code.fromAsset("bundled"),
       handler: "getUser.handler",
       environment: {
         TABLE_NAME: dbTable.tableName
@@ -55,7 +55,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const createUserHandler = new Function(this, 'create_user_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda/users'),
+      code: Code.fromAsset('bundled'),
       handler: "createUser.handler",
       environment: {
         TABLE_NAME: dbTable.tableName
@@ -64,7 +64,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const deregisterUserHandler = new Function(this, 'deregister_user_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda/users'),
+      code: Code.fromAsset('bundled'),
       handler: "deregisterUser.handler",
       environment: {
         TABLE_NAME: dbTable.tableName
@@ -73,7 +73,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const getUserProfileImageHandler = new Function(this, 'get_user_profile_image_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda/profileImages'),
+      code: Code.fromAsset('bundled'),
       handler: "getUserProfileImage.handler",
       environment: {
         TABLE_NAME: dbTable.tableName,
@@ -83,7 +83,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const deleteUserProfileImagehandler = new Function(this, 'delete_user_profile_image_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda/profileImages'),
+      code: Code.fromAsset('bundled'),
       handler: "deleteUserProfileImage.handler",
       environment: {
         TABLE_NAME: dbTable.tableName,
@@ -93,7 +93,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const setUserProfileImagehandler = new Function(this, 'set_user_profile_image_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda/profileImages'),
+      code: Code.fromAsset('bundled'),
       handler: "setUserProfileImage.handler",
       environment: {
         TABLE_NAME: dbTable.tableName,
@@ -103,13 +103,13 @@ export class UsersServiceStack extends cdk.Stack {
 
     const testyTestTest = new Function(this, 'testyTestTest', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda'),
+      code: Code.fromAsset('bundled'),
       handler: "testyTestTest.handler",
     });
 
     const userTableUpdatedHandler = new Function(this, 'user_table_updated_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda'),
+      code: Code.fromAsset('bundled'),
       handler: "userTableUpdated.handler",
       environment: {
         userDeregisteredTopicArn: userDeregisteredTopic.topicArn
@@ -123,7 +123,7 @@ export class UsersServiceStack extends cdk.Stack {
 
     const authHandler = new Function(this, 'auth_handler', {
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('resources/lambda'),
+      code: Code.fromAsset('bundled'),
       handler: "auth.handler",
     });
 
