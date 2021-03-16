@@ -7,7 +7,7 @@
   "scripts": {
     "compilejs": "tsc",
     "prebuild": "npm run compilejs",
-    "build": "esbuild",
+    "build": "node build.js",
     "presynth": "npm run build",
     "synth": "cdk synth",
     "predeploy": "npm run synth",
