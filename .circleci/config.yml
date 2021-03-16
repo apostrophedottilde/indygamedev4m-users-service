@@ -7,7 +7,7 @@ jobs:
       - image: circleci/node:12
     steps:
       - checkout
-      - run: npm i --force && npm run build
+      - run: npm i --force
       - run: npm run deploy
 workflows:
   deploy_users_service:
