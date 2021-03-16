@@ -11,13 +11,13 @@ exports.handler = function (event: any, context: any, callback: any) {
     console.log(decodedToken);
 
     if (decodedToken) {
-        callback(null, generatePolicy('user', 'Allow', event.methodArn));
+        callback(null, generatePolicy(decodedToken, 'user', 'Allow', event.methodArn));
     } else {
-        callback(null, generatePolicy('user', 'Deny', event.methodArn));
+        callback(null, generatePolicy(decodedToken, 'user', 'Deny', event.methodArn));
     }
 }
 
-var generatePolicy = function (principalId: string, effect: any, resource: any) {
+var generatePolicy = function (decodedToken: any, principalId: string, effect: any, resource: any) {
     var authResponse: any = {};
 
     authResponse.principalId = principalId;
@@ -34,10 +34,6 @@ var generatePolicy = function (principalId: string, effect: any, resource: any) 
     }
 
     // Optional output with custom properties of the String, Number or Boolean type.
-    authResponse.context = {
-        "stringKey": "stringval",
-        "numberKey": 123,
-        "booleanKey": true
-    };
+    authResponse.context = decodedToken;
     return authResponse;
 }
