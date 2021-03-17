@@ -13,6 +13,8 @@ export class UsersServiceStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const jwtSecret = 'sdkfheifnewurvh3457ewomtnv7854h6o48hbt78e4ucjr8945h7ybiorewirut3h4985d7u4239085byv34890d48o75yb347nd82374b834nifo5';
+
     const dbTable = new Table(this, 'user-data-table', {
       tableName: 'user-data-table',
       partitionKey: {
@@ -125,6 +127,18 @@ export class UsersServiceStack extends cdk.Stack {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset('bundled'),
       handler: "auth.handler",
+      environment: {
+        JWT_SECRET: jwtSecret
+      }
+    });
+
+    const loginHandler = new Function(this, 'login_handler', {
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset('bundled'),
+      handler: "login.handler",
+      environment: {
+        JWT_SECRET: jwtSecret
+      }
     });
 
     dbTable.grantReadData(getUserhandler);
@@ -135,16 +149,18 @@ export class UsersServiceStack extends cdk.Stack {
 
     const author = new RequestAuthorizer(this, 'api-authorizor', {
       handler: authHandler,
-      identitySources: [IdentitySource.header('Authorizor')]
+      identitySources: [IdentitySource.header('Authentication')]
     });
 
     author._attachToApi(api);
 
     const usersResource: Resource = api.root.addResource('users');
+    const loginResource: Resource = usersResource.addResource('lo');
     const specificUser: Resource = usersResource.addResource('{userId}');
     const profileImageResource: Resource = specificUser.addResource('profileImage');
 
-    usersResource.addMethod("POST", new LambdaIntegration(createUserHandler), { authorizer: author });
+    loginResource.addMethod("POST", new LambdaIntegration(loginHandler));
+    usersResource.addMethod("POST", new LambdaIntegration(createUserHandler));
     specificUser.addMethod("GET", new LambdaIntegration(getUserhandler), { authorizer: author })
     specificUser.addMethod("DELETE", new LambdaIntegration(deregisterUserHandler), { authorizer: author});
     profileImageResource.addMethod("GET", new LambdaIntegration(getUserProfileImageHandler), { authorizer: author,  });    
