@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 exports.handler = async function (event: any, context: any, callback: any) {
     console.log(event)
     console.log(context)
-    const tkn = event.headers["Authentication"]
+    const tkn = event.headers["Authenticator"]
 
     const decodedToken = jwt.verify(tkn, process.env.JWT_SECRET!);
     if (decodedToken) {

@@ -1,12 +1,11 @@
 import * as cdk from '@aws-cdk/core';
-import { AuthorizationType, Authorizer, IdentitySource, LambdaIntegration, Method, RequestAuthorizer, Resource, RestApi, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
+import { IdentitySource, LambdaIntegration, RequestAuthorizer, Resource, RestApi, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
 import { Code, Function, Runtime, StartingPosition } from '@aws-cdk/aws-lambda';
 import { AttributeType, Table, StreamViewType } from '@aws-cdk/aws-dynamodb';
 import { Queue } from '@aws-cdk/aws-sqs';
 import { Topic } from '@aws-cdk/aws-sns';
-import { LambdaSubscription } from '@aws-cdk/aws-sns-subscriptions';
+import { StringParameter } from '@aws-cdk/aws-ssm';
 import { DynamoEventSource, SqsDlq } from '@aws-cdk/aws-lambda-event-sources';
-import { SNS } from 'aws-sdk';
 import { Bucket } from '@aws-cdk/aws-s3';
 
 export class UsersServiceStack extends cdk.Stack {
@@ -33,13 +32,16 @@ export class UsersServiceStack extends cdk.Stack {
       fifo: false, // standard
       topicName: 'user_deregistered_sns_topic',
     });
+
+    new StringParameter(this, 'user_deregistered_topic_ssm', {
+      parameterName: 'USER_DEREGISTERED_TOPIC_ARN',
+      description: "The ARN of a topic which events are published to whenever a user deregisters their account. \nAny other independant service can subscribe to this event and react accordingly. \nOther service dont need to know about changes to the ARN after a redeployment as they can just pull from the parameter store.",
+      stringValue: userDeregisteredTopic.topicArn
+    });
     
-
-    const deadLetterQueue = new Queue(this, 'user_deregistered_DLQ');
-
     const dynamoSource = new DynamoEventSource(dbTable, {
       startingPosition: StartingPosition.TRIM_HORIZON,
-      onFailure: new SqsDlq(deadLetterQueue),
+      onFailure: new SqsDlq(new Queue(this, 'user_deregistered_DLQ')),
       batchSize: 5,
       enabled: true,
       retryAttempts: 5
@@ -103,12 +105,6 @@ export class UsersServiceStack extends cdk.Stack {
       }
     });
 
-    const testyTestTest = new Function(this, 'testyTestTest', {
-      runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset('bundled'),
-      handler: "testyTestTest.handler",
-    });
-
     const userTableUpdatedHandler = new Function(this, 'user_table_updated_handler', {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset('bundled'),
@@ -145,17 +141,21 @@ export class UsersServiceStack extends cdk.Stack {
     dbTable.grantWriteData(createUserHandler);
     dbTable.grantReadWriteData(deregisterUserHandler);
 
+    dbTable.grantReadData(loginHandler);
+    dbTable.grantReadWriteData(getUserProfileImageHandler);
+    dbTable.grantReadWriteData(setUserProfileImagehandler);
+    dbTable.grantReadWriteData(deleteUserProfileImagehandler);
+
     const api: RestApi = new RestApi(this, "foremz-user-api");
 
-    const author = new RequestAuthorizer(this, 'api-authorizor', {
+    const author = new TokenAuthorizer(this, 'api-authorizor', {
       handler: authHandler,
-      identitySources: [IdentitySource.header('Authentication')]
     });
 
     author._attachToApi(api);
 
     const usersResource: Resource = api.root.addResource('users');
-    const loginResource: Resource = usersResource.addResource('lo');
+    const loginResource: Resource = usersResource.addResource('login');
     const specificUser: Resource = usersResource.addResource('{userId}');
     const profileImageResource: Resource = specificUser.addResource('profileImage');
 
@@ -166,8 +166,5 @@ export class UsersServiceStack extends cdk.Stack {
     profileImageResource.addMethod("GET", new LambdaIntegration(getUserProfileImageHandler), { authorizer: author,  });    
     profileImageResource.addMethod("PUT", new LambdaIntegration(setUserProfileImagehandler), { authorizer: author });
     profileImageResource.addMethod("DELETE", new LambdaIntegration(deleteUserProfileImagehandler), { authorizer: author });
-
-    const otherSide = Topic.fromTopicArn(this, 'external_user_deregistered_topic', userDeregisteredTopic.topicArn)
-    otherSide.addSubscription(new LambdaSubscription(testyTestTest));
   }
 }
